@@ -1,0 +1,33 @@
+# Node.js with Angular
+# Build a Node.js project that uses Angular.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '22.17.1'
+  displayName: 'Install Node.js'
+
+- script: |
+    npm install -g @angular/cli
+    npm install
+    ng build --configuration production
+  displayName: 'npm install and build'
+
+  # (Optional – keep once for validation, then remove)
+- script: |
+    ls dist/web-admin/browser
+  displayName: 'Verify build output'
+
+- task: AzureStaticWebApp@0
+  inputs:
+    app_location: 'dist/web-admin/browser' # on ng build, files got saved in this location. SWA looks for:<app_location>/index.html
+    skip_app_build: true
+    azure_static_web_apps_api_token: '$(SWA_TOKEN)'
